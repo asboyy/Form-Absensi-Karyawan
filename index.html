@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <title>Form Absensi Karyawan</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
+
+      .container {
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        max-width: 480px;
+        width: 100%;
+        box-sizing: border-box;
+        animation: fadeIn 1s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      h1 {
+        text-align: center;
+        color: #343a40;
+        margin-bottom: 30px;
+        font-size: 2em;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #495057;
+      }
+
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 25px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1em;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+      }
+
+      input[type="text"]:focus,
+      select:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1.1em;
+        font-weight: bold;
+        transition: background-color 0.3s ease, transform 0.2s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+        transform: scale(1.03);
+      }
+
+      button:active {
+        transform: scale(0.97);
+      }
+
+      #response {
+        margin-top: 25px;
+        text-align: center;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 5px;
+        display: none;
+      }
+
+      #response.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+
+      #response.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Form Absensi Karyawan</h1>
+      <form id="attendanceForm">
+        <label for="nama">Nama Lengkap:</label>
+        <input type="text" id="nama" name="nama" required />
+
+        <label for="idKaryawan">ID Karyawan:</label>
+        <input type="text" id="idKaryawan" name="idKaryawan" required />
+
+        <label for="status">Status Kehadiran:</label>
+        <select id="status" name="status" required>
+          <option value="Hadir">Hadir</option>
+          <option value="Izin">Izin</option>
+          <option value="Sakit">Sakit</option>
+          <option value="Cuti">Cuti</option>
+        </select>
+
+        <button type="submit">Submit Absensi</button>
+      </form>
+      <div id="response"></div>
+
+      <!-- 🔊 Suara Confirm Sukses -->
+      <audio id="successSound" preload="auto">
+        <source
+          src="https://cdn.pixabay.com/audio/2022/03/15/audio_1b373b6c5e.mp3"
+          type="audio/mpeg"
+        />
+        Browser Anda tidak mendukung pemutar audio.
+      </audio>
+    </div>
+
+    <script>
+      document
+        .getElementById("attendanceForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Mencegah submit default
+
+          var formData = new FormData(this);
+          var responseDiv = document.getElementById("response");
+          var sound = document.getElementById("successSound");
+
+          responseDiv.textContent = "";
+          responseDiv.className = "";
+
+          google.script.run
+            .withSuccessHandler(function (res) {
+              responseDiv.classList.add("success");
+              responseDiv.textContent = res;
+              responseDiv.style.display = "block";
+              sound.play(); // 🔊 Mainkan suara saat sukses
+              document.getElementById("attendanceForm").reset();
+            })
+            .withFailureHandler(function (err) {
+              responseDiv.classList.add("error");
+              responseDiv.textContent = "Terjadi kesalahan: " + err.message;
+              responseDiv.style.display = "block";
+            })
+            .doPost(Object.fromEntries(formData.entries()));
+        });
+    </script>
+  </body>
+</html>
